@@ -4,16 +4,23 @@
 
 const worker = require('../src/worker.js');
 
-// Mock environment with the provided test credentials
+// Load environment variables from .env
+try {
+  require('dotenv').config();
+} catch (e) {
+  // dotenv may not be installed in all environments; proceed if unavailable
+}
+
+// Mock environment using environment variables
 const mockEnv = {
-  CLIENT_ID: 'c06492eb-f296-4168-b554-b084ecaa903a',
-  CLIENT_SECRET: 'jiq8Q~B1r2y8Q5Af63hRU25Mb~ZpTZ4.JI_vYbT9',
-  TENANT_ID: 'f91d64dc-5dc0-4339-aab4-c3a9c67f1ac7',
-  BASE_URL: 'http://localhost:8787',
+  CLIENT_ID: process.env.CLIENT_ID || '',
+  CLIENT_SECRET: process.env.CLIENT_SECRET || '',
+  TENANT_ID: process.env.TENANT_ID || 'common',
+  BASE_URL: process.env.BASE_URL || 'http://localhost:8787',
   OUTLOOK_TOKENS: {
     get: async () => null,
     put: async (key, value) => {
-      console.log(`KV PUT: ${key} = ${value.substring(0, 100)}...`);
+      console.log(`KV PUT: ${key} = ${String(value).substring(0, 100)}...`);
     },
     delete: async (key) => {
       console.log(`KV DELETE: ${key}`);
