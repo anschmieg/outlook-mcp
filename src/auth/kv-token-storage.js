@@ -2,6 +2,8 @@
  * Cloudflare KV-based token storage for OAuth tokens
  */
 
+const logger = require('../utils/log');
+
 class KVTokenStorage {
   constructor(kvNamespace) {
     this.kv = kvNamespace;
@@ -22,7 +24,7 @@ class KVTokenStorage {
       };
 
       await this.kv.put(`tokens:${userId}`, JSON.stringify(tokenData));
-      console.log(`Tokens saved for user: ${userId}`);
+      logger.debug(`Tokens saved for user: ${userId}`);
       return true;
     } catch (error) {
       console.error('Error saving tokens to KV:', error);
@@ -40,18 +42,18 @@ class KVTokenStorage {
       const tokenData = await this.kv.get(`tokens:${userId}`, 'json');
       
       if (!tokenData) {
-        console.log(`No tokens found for user: ${userId}`);
+        logger.debug(`No tokens found for user: ${userId}`);
         return null;
       }
 
       // Check if token has expired
       const now = Date.now();
       if (tokenData.expires_at && now > tokenData.expires_at) {
-        console.log(`Tokens expired for user: ${userId}`);
+        logger.warn(`Tokens expired for user: ${userId}`);
         return null;
       }
 
-      console.log(`Tokens loaded for user: ${userId}`);
+      logger.debug(`Tokens loaded for user: ${userId}`);
       return tokenData;
     } catch (error) {
       console.error('Error loading tokens from KV:', error);
@@ -75,14 +77,14 @@ class KVTokenStorage {
       // If token expires soon (within 5 minutes), try to refresh
       const fiveMinutesFromNow = Date.now() + (5 * 60 * 1000);
       if (tokens.expires_at && tokens.expires_at < fiveMinutesFromNow && tokens.refresh_token) {
-        console.log('Token expires soon, attempting refresh...');
+        logger.warn('Access token expires soon, attempting refresh...');
         
         try {
           // We'll need the environment for token refresh, but it's not available here
           // This will be handled by the compatibility layer
           return tokens.access_token;
         } catch (refreshError) {
-          console.error('Token refresh failed:', refreshError);
+          logger.error('Token refresh failed:', refreshError);
           // Return current token if refresh fails, might still be valid
           return tokens.access_token;
         }
@@ -90,7 +92,7 @@ class KVTokenStorage {
 
       return tokens.access_token;
     } catch (error) {
-      console.error('Error getting valid access token:', error);
+      logger.error('Error getting valid access token:', error);
       return null;
     }
   }
@@ -112,7 +114,7 @@ class KVTokenStorage {
       
       return newTokens;
     } catch (error) {
-      console.error('Error refreshing tokens:', error);
+      logger.error('Error refreshing tokens:', error);
       throw error;
     }
   }
@@ -124,7 +126,7 @@ class KVTokenStorage {
   async deleteTokens(userId = this.defaultUserId) {
     try {
       await this.kv.delete(`tokens:${userId}`);
-      console.log(`Tokens deleted for user: ${userId}`);
+      logger.debug(`Tokens deleted for user: ${userId}`);
     } catch (error) {
       console.error('Error deleting tokens from KV:', error);
       throw error;
