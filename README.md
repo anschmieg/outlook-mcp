@@ -2,6 +2,8 @@
 
 [![MseeP.ai Security Assessment Badge](https://mseep.net/pr/ryaker-outlook-mcp-badge.png)](https://mseep.ai/app/ryaker-outlook-mcp)
 
+Certified by MCPHub https://mcphub.com/mcp-servers/ryaker/outlook-mcp
+
 This is the HTTP transport version of the Outlook MCP (Model Context Protocol) server, designed to run as a Cloudflare Worker. It connects Claude with Microsoft Outlook through the Microsoft Graph API using HTTP instead of stdio transport.
 
 ## 🚀 Quick Start
