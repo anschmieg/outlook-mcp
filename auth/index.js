@@ -1,32 +1,19 @@
 /**
- * Authentication module for Outlook MCP server
+ * Minimal auth bridge for compatibility.
+ * Used by legacy tool modules that `require('../auth')`.
+ * In HTTP mode, ensureAuthenticated pulls from a global context set by the worker.
  */
-const tokenManager = require('./token-manager');
-const { authTools } = require('./tools');
 
-/**
- * Ensures the user is authenticated and returns an access token
- * @param {boolean} forceNew - Whether to force a new authentication
- * @returns {Promise<string>} - Access token
- * @throws {Error} - If authentication fails
- */
-async function ensureAuthenticated(forceNew = false) {
-  if (forceNew) {
-    // Force re-authentication
-    throw new Error('Authentication required');
+async function ensureAuthenticated() {
+  const ctx = global.__httpContext;
+  if (ctx && ctx.tokenStorage && typeof ctx.tokenStorage.getValidAccessToken === 'function') {
+    const accessToken = await ctx.tokenStorage.getValidAccessToken();
+    if (accessToken) return accessToken;
   }
-  
-  // Check for existing token
-  const accessToken = tokenManager.getAccessToken();
-  if (!accessToken) {
-    throw new Error('Authentication required');
-  }
-  
-  return accessToken;
+  throw new Error('Authentication required');
 }
 
 module.exports = {
-  tokenManager,
-  authTools,
-  ensureAuthenticated
+  ensureAuthenticated,
 };
+

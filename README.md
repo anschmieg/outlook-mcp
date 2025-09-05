@@ -142,16 +142,34 @@ Configure your MCP client to use HTTP transport:
 
 ## 🧪 Testing
 
-```bash
-# Run HTTP transport tests
-npm test
+### Automated Tests
+- Run Jest suite: `npm test`
+  - Includes HTTP worker tests for `/health`, `/mcp initialize`, `/mcp tools/list`, and auth tool basics.
+  - Legacy SSE and file-based token tests are excluded for this HTTP refactor.
 
-# Test authentication
-node test/auth-test.js
+### Manual HTTP Testing (Local)
+- Start local Worker: `npm run dev` (or `npx wrangler dev src/worker.js`)
+- Health check:
+  - `curl http://localhost:8787/health | jq .`
+- Initialize (JSON-RPC):
+  - `curl -s -X POST http://localhost:8787/mcp -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | jq .`
+- List tools:
+  - `curl -s -X POST http://localhost:8787/mcp -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' | jq .`
+- Start auth flow (tool):
+  - `curl -s -X POST http://localhost:8787/mcp -H 'Content-Type: application/json' -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"authenticate","arguments":{}}}' | jq .`
+- Start auth flow (endpoint):
+  - `curl -s http://localhost:8787/auth/start | jq .`
 
-# Test basic functionality
-node test/http-transport.test.js
-```
+Tip: `./test-direct.sh` runs a local dev server and performs the above checks automatically.
+
+### Manual HTTP Testing (Deployed)
+- After `npm run deploy`, replace the base URL with your Worker domain:
+  - `curl https://your-worker.workers.dev/health`
+  - `curl -X POST https://your-worker.workers.dev/mcp ...`
+
+### MCP Inspector
+- MCP Inspector supports stdio and SSE, but not the HTTP JSON-RPC transport used here.
+- Use curl/httpie for manual HTTP testing, or configure an MCP client that supports `transport.type = "http"`.
 
 ## 🏗️ Architecture
 

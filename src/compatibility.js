@@ -12,41 +12,11 @@ const { callGraphAPIWithContext } = require('./utils/http-graph-api');
 function createHttpCompatibleHandler(originalHandler) {
   return async function(args, context) {
     try {
-      // Create a mock of the old interface for backward compatibility
-      const mockAuth = {
-        ensureAuthenticated: async () => {
-          const accessToken = await context.tokenStorage.getValidAccessToken();
-          if (!accessToken) {
-            throw new Error('Authentication required');
-          }
-          return accessToken;
-        }
-      };
-
-      // Create a mock graph API that uses the new context
-      const mockGraphAPI = {
-        callGraphAPI: async (accessToken, method, path, data, queryParams) => {
-          return await callGraphAPIWithContext(context, method, path, data, queryParams);
-        }
-      };
-
-      // Temporarily replace the required modules in the global scope
-      const originalRequire = require;
-      require = function(modulePath) {
-        if (modulePath === '../auth') {
-          return mockAuth;
-        }
-        if (modulePath === '../utils/graph-api') {
-          return mockGraphAPI;
-        }
-        return originalRequire(modulePath);
-      };
+      // Expose HTTP context so legacy modules can resolve auth/graph via a bridge
+      global.__httpContext = context;
 
       // Call the original handler
       const result = await originalHandler(args);
-
-      // Restore original require
-      require = originalRequire;
 
       return result;
     } catch (error) {
@@ -57,6 +27,9 @@ function createHttpCompatibleHandler(originalHandler) {
           text: `Error: ${error.message}`
         }]
       };
+    } finally {
+      // Cleanup context
+      try { delete global.__httpContext; } catch (_) {}
     }
   };
 }
