@@ -7,7 +7,7 @@
     "dev": "wrangler dev src/worker.js",
     "deploy": "wrangler deploy src/worker.js",
     "deploy-script": "./scripts/deploy.sh",
-    "test": "jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "keywords": [
     "claude",
