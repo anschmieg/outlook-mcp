@@ -3,6 +3,7 @@
  */
 
 const GRAPH_API_ENDPOINT = 'https://graph.microsoft.com/v1.0/';
+const logger = require('./log');
 
 /**
  * Makes a request to the Microsoft Graph API using fetch
@@ -15,7 +16,7 @@ const GRAPH_API_ENDPOINT = 'https://graph.microsoft.com/v1.0/';
  */
 async function callGraphAPI(accessToken, method, path, data = null, queryParams = {}) {
   try {
-    console.log(`Making API call: ${method} ${path}`);
+    // Reduced logging: suppress info-level Graph call logs
     
     // Build query string from parameters with special handling for OData filters
     let queryString = '';
@@ -47,11 +48,12 @@ async function callGraphAPI(accessToken, method, path, data = null, queryParams 
         queryString = '?' + queryString;
       }
       
-      console.log(`Query string: ${queryString}`);
+      // Optional debug for query string
+      logger.debug(`Graph query: ${queryString || '(none)'}`);
     }
     
     const url = `${GRAPH_API_ENDPOINT}${path}${queryString}`;
-    console.log(`Full URL: ${url}`);
+    logger.debug(`Graph request: ${method} ${url}`);
     
     const requestOptions = {
       method: method,

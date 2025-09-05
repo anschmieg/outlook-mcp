@@ -2,7 +2,8 @@
  * Improved search emails functionality
  */
 const config = require('../config');
-const { callGraphAPI } = require('../utils/graph-api');
+const { callGraphAPI } = require('../src/utils/http-graph-api');
+const logger = require('../src/utils/log');
 const { ensureAuthenticated } = require('../auth');
 const { resolveFolderPath } = require('./folder-utils');
 
@@ -27,7 +28,6 @@ async function handleSearchEmails(args) {
     
     // Resolve the folder path
     const endpoint = await resolveFolderPath(accessToken, folder);
-    console.error(`Using endpoint: ${endpoint} for folder: ${folder}`);
     
     // Execute progressive search
     const response = await progressiveSearch(
@@ -76,16 +76,14 @@ async function progressiveSearch(endpoint, accessToken, searchTerms, filterTerms
   // 1. Try combined search (most specific)
   try {
     const params = buildSearchParams(searchTerms, filterTerms, count);
-    console.error("Attempting combined search with params:", params);
     searchAttempts.push("combined-search");
     
     const response = await callGraphAPI(accessToken, 'GET', endpoint, null, params);
     if (response.value && response.value.length > 0) {
-      console.error(`Combined search successful: found ${response.value.length} results`);
       return response;
     }
   } catch (error) {
-    console.error(`Combined search failed: ${error.message}`);
+    logger.debug(`Combined search failed: ${error.message}`);
   }
   
   // 2. Try each search term individually, starting with most specific
@@ -94,7 +92,6 @@ async function progressiveSearch(endpoint, accessToken, searchTerms, filterTerms
   for (const term of searchPriority) {
     if (searchTerms[term]) {
       try {
-        console.error(`Attempting search with only ${term}: "${searchTerms[term]}"`);
         searchAttempts.push(`single-term-${term}`);
         
         // For single term search, only use $search with that term
@@ -118,11 +115,10 @@ async function progressiveSearch(endpoint, accessToken, searchTerms, filterTerms
         
         const response = await callGraphAPI(accessToken, 'GET', endpoint, null, simplifiedParams);
         if (response.value && response.value.length > 0) {
-          console.error(`Search with ${term} successful: found ${response.value.length} results`);
           return response;
         }
       } catch (error) {
-        console.error(`Search with ${term} failed: ${error.message}`);
+        logger.debug(`Search with ${term} failed: ${error.message}`);
       }
     }
   }
@@ -130,7 +126,6 @@ async function progressiveSearch(endpoint, accessToken, searchTerms, filterTerms
   // 3. Try with only boolean filters
   if (filterTerms.hasAttachments === true || filterTerms.unreadOnly === true) {
     try {
-      console.error("Attempting search with only boolean filters");
       searchAttempts.push("boolean-filters-only");
       
       const filterOnlyParams = {
@@ -143,15 +138,14 @@ async function progressiveSearch(endpoint, accessToken, searchTerms, filterTerms
       addBooleanFilters(filterOnlyParams, filterTerms);
       
       const response = await callGraphAPI(accessToken, 'GET', endpoint, null, filterOnlyParams);
-      console.error(`Boolean filter search found ${response.value?.length || 0} results`);
       return response;
     } catch (error) {
-      console.error(`Boolean filter search failed: ${error.message}`);
+      logger.debug(`Boolean filter search failed: ${error.message}`);
     }
   }
   
   // 4. Final fallback: just get recent emails
-  console.error("All search strategies failed, falling back to recent emails");
+  logger.warn("All search strategies failed, falling back to recent emails");
   searchAttempts.push("recent-emails");
   
   const basicParams = {
@@ -161,7 +155,6 @@ async function progressiveSearch(endpoint, accessToken, searchTerms, filterTerms
   };
   
   const response = await callGraphAPI(accessToken, 'GET', endpoint, null, basicParams);
-  console.error(`Fallback to recent emails found ${response.value?.length || 0} results`);
   
   // Add a note to the response about the search attempts
   response._searchInfo = {

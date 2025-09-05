@@ -1,7 +1,7 @@
 /**
  * Create event functionality
  */
-const { callGraphAPI } = require('../utils/graph-api');
+const { callGraphAPI } = require('../src/utils/http-graph-api');
 const { ensureAuthenticated } = require('../auth');
 const { DEFAULT_TIMEZONE } = require('../config');
 
