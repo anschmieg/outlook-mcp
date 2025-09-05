@@ -69,9 +69,9 @@ npm run deploy
 In Cloudflare Dashboard → Workers → Your Worker → Settings → Environment Variables:
 
 ```
-CLIENT_ID=c06492eb-f296-4168-b554-b084ecaa903a
-CLIENT_SECRET=jiq8Q~B1r2y8Q5Af63hRU25Mb~ZpTZ4.JI_vYbT9
-TENANT_ID=f91d64dc-5dc0-4339-aab4-c3a9c67f1ac7
+CLIENT_ID=your-azure-app-client-id
+CLIENT_SECRET=your-azure-app-client-secret
+TENANT_ID=your-azure-tenant-id-or-common
 BASE_URL=https://your-worker-domain.workers.dev
 ```
 
@@ -205,10 +205,10 @@ The HTTP version maintains compatibility with all existing tools while providing
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `CLIENT_ID` | Azure app client ID | `c06492eb-f296-4168-b554-b084ecaa903a` |
-| `CLIENT_SECRET` | Azure app client secret | `jiq8Q~B1r2y8Q5Af63hRU25Mb~ZpTZ4.JI_vYbT9` |
-| `TENANT_ID` | Azure tenant ID (optional) | `f91d64dc-5dc0-4339-aab4-c3a9c67f1ac7` |
-| `BASE_URL` | Worker base URL | `https://outlook-mcp.workers.dev` |
+| `CLIENT_ID` | Azure app client ID | `your-azure-app-client-id` |
+| `CLIENT_SECRET` | Azure app client secret | `your-azure-app-client-secret` |
+| `TENANT_ID` | Azure tenant ID (optional) | `your-azure-tenant-id-or-common` |
+| `BASE_URL` | Worker base URL | `https://your-worker-domain.workers.dev` |
 
 ## 🤝 Contributing
 
