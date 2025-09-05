@@ -1,0 +1,22 @@
+name = "outlook-mcp-http"
+main = "src/worker.js"
+compatibility_date = "2023-12-01"
+
+# KV namespace for storing OAuth tokens
+[[kv_namespaces]]
+binding = "OUTLOOK_TOKENS"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id"
+
+# Environment variables (these should be set in the Cloudflare dashboard)
+[env.production.vars]
+# CLIENT_ID = "your-client-id"           # Set in dashboard for security
+# CLIENT_SECRET = "your-client-secret"   # Set in dashboard for security  
+# TENANT_ID = "your-tenant-id"           # Set in dashboard for security
+# BASE_URL = "https://outlook-mcp.your-domain.workers.dev"
+
+[env.development.vars]
+# CLIENT_ID = "your-client-id"           # Set in dashboard for security
+# CLIENT_SECRET = "your-client-secret"   # Set in dashboard for security
+# TENANT_ID = "your-tenant-id"           # Set in dashboard for security
+# BASE_URL = "http://localhost:8787"
