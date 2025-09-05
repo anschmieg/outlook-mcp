@@ -38,8 +38,8 @@ const SERVER_CONFIG = {
 async function handleJsonRpcRequest(request, env) {
   try {
     const { method, params, id } = request;
-    
-    console.log(`JSON-RPC Request: ${method} [${id}]`);
+    const logger = require('./utils/log');
+    logger.debug(`JSON-RPC Request: ${method} [${id}]`);
     
     // Initialize the KV token storage
     const tokenStorage = new KVTokenStorage(env.OUTLOOK_TOKENS);
@@ -152,6 +152,9 @@ async function handleJsonRpcRequest(request, env) {
  */
 module.exports = {
   async fetch(request, env, ctx) {
+    const logger = require('./utils/log');
+    // Set log level from env on each request
+    logger.setLevelFromEnv(env);
     const url = new URL(request.url);
     
     // CORS headers

@@ -2,7 +2,10 @@
  * Jest tests for HTTP transport functionality
  */
 
-const worker = require('../src/worker.js');
+let worker;
+beforeAll(async () => {
+  worker = (await import('../src/worker.js')).default;
+});
 
 // Mock environment
 const mockEnv = {

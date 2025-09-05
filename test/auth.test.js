@@ -2,7 +2,10 @@
  * Jest tests for authentication-related endpoints and tools
  */
 
-const worker = require('../src/worker.js');
+let worker;
+beforeAll(async () => {
+  worker = (await import('../src/worker.js')).default;
+});
 
 // Load environment variables from .env (optional)
 try { require('dotenv').config(); } catch (_) {}
@@ -69,4 +72,3 @@ describe('Auth Tools and Endpoints (HTTP)', () => {
     expect(payload.authUrl.includes('login.microsoftonline.com')).toBe(true);
   });
 });
-
