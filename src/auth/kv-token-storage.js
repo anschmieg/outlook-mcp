@@ -78,8 +78,9 @@ class KVTokenStorage {
         console.log('Token expires soon, attempting refresh...');
         
         try {
-          const refreshedTokens = await this.refreshTokens(tokens.refresh_token, userId);
-          return refreshedTokens.access_token;
+          // We'll need the environment for token refresh, but it's not available here
+          // This will be handled by the compatibility layer
+          return tokens.access_token;
         } catch (refreshError) {
           console.error('Token refresh failed:', refreshError);
           // Return current token if refresh fails, might still be valid
@@ -98,11 +99,22 @@ class KVTokenStorage {
    * Refresh tokens using refresh token
    * @param {string} refreshToken - The refresh token
    * @param {string} userId - User identifier
+   * @param {object} env - Environment variables
    * @returns {object} - New token object
    */
-  async refreshTokens(refreshToken, userId = this.defaultUserId) {
-    // This will be called from oauth-handler with proper environment
-    throw new Error('refreshTokens should be called from oauth-handler');
+  async refreshTokens(refreshToken, userId = this.defaultUserId, env) {
+    try {
+      const { refreshAccessToken } = require('../oauth-handler');
+      const newTokens = await refreshAccessToken(refreshToken, env);
+      
+      // Save the new tokens
+      await this.saveTokens(newTokens, userId);
+      
+      return newTokens;
+    } catch (error) {
+      console.error('Error refreshing tokens:', error);
+      throw error;
+    }
   }
 
   /**

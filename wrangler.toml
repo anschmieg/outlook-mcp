@@ -8,15 +8,17 @@ binding = "OUTLOOK_TOKENS"
 id = "your-kv-namespace-id"
 preview_id = "your-preview-kv-namespace-id"
 
-# Environment variables (these should be set in the Cloudflare dashboard)
-[env.production.vars]
-# CLIENT_ID = "your-client-id"           # Set in dashboard for security
-# CLIENT_SECRET = "your-client-secret"   # Set in dashboard for security  
-# TENANT_ID = "your-tenant-id"           # Set in dashboard for security
+# Environment variables (set these in Cloudflare dashboard for security)
+# CLIENT_ID = "your-azure-app-client-id"
+# CLIENT_SECRET = "your-azure-app-client-secret"  
+# TENANT_ID = "your-azure-tenant-id-or-common"
 # BASE_URL = "https://outlook-mcp.your-domain.workers.dev"
 
-[env.development.vars]
-# CLIENT_ID = "your-client-id"           # Set in dashboard for security
-# CLIENT_SECRET = "your-client-secret"   # Set in dashboard for security
-# TENANT_ID = "your-tenant-id"           # Set in dashboard for security
-# BASE_URL = "http://localhost:8787"
+[build]
+command = "echo 'Build complete'"
+
+[env.development]
+name = "outlook-mcp-http-dev"
+
+[env.production]
+name = "outlook-mcp-http"

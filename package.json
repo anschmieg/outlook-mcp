@@ -7,10 +7,13 @@
     "start": "node index.js",
     "start-http": "wrangler dev src/worker.js",
     "deploy": "wrangler deploy src/worker.js",
+    "deploy-script": "./scripts/deploy.sh",
     "auth-server": "node outlook-auth-server.js",
     "test-mode": "USE_TEST_MODE=true node index.js",
     "inspect": "npx @modelcontextprotocol/inspector node index.js",
-    "test": "jest"
+    "test": "jest",
+    "test-http": "node test/http-transport.test.js",
+    "test-auth": "node test/auth-test.js"
   },
   "keywords": [
     "claude",
