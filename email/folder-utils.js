@@ -1,7 +1,7 @@
 /**
  * Email folder utilities
  */
-const { callGraphAPI } = require('../utils/graph-api');
+const { callGraphAPI } = require('../src/utils/http-graph-api');
 
 /**
  * Cache of folder information to reduce API calls
@@ -34,7 +34,6 @@ async function resolveFolderPath(accessToken, folderName) {
   // Check if it's a well-known folder (case-insensitive)
   const lowerFolderName = folderName.toLowerCase();
   if (wellKnownFolders[lowerFolderName]) {
-    console.error(`Using well-known folder path for "${folderName}"`);
     return wellKnownFolders[lowerFolderName];
   }
   
@@ -43,12 +42,11 @@ async function resolveFolderPath(accessToken, folderName) {
     const folderId = await getFolderIdByName(accessToken, folderName);
     if (folderId) {
       const path = `me/mailFolders/${folderId}/messages`;
-      console.error(`Resolved folder "${folderName}" to path: ${path}`);
       return path;
     }
     
     // If not found, fall back to inbox
-    console.error(`Couldn't find folder "${folderName}", falling back to inbox`);
+    console.warn(`Couldn't find folder "${folderName}", falling back to inbox`);
     return 'me/messages';
   } catch (error) {
     console.error(`Error resolving folder "${folderName}": ${error.message}`);
@@ -65,7 +63,6 @@ async function resolveFolderPath(accessToken, folderName) {
 async function getFolderIdByName(accessToken, folderName) {
   try {
     // First try with exact match filter
-    console.error(`Looking for folder with name "${folderName}"`);
     const response = await callGraphAPI(
       accessToken,
       'GET',
@@ -75,12 +72,10 @@ async function getFolderIdByName(accessToken, folderName) {
     );
     
     if (response.value && response.value.length > 0) {
-      console.error(`Found folder "${folderName}" with ID: ${response.value[0].id}`);
       return response.value[0].id;
     }
     
     // If exact match fails, try to get all folders and do a case-insensitive comparison
-    console.error(`No exact match found for "${folderName}", trying case-insensitive search`);
     const allFoldersResponse = await callGraphAPI(
       accessToken,
       'GET',
@@ -96,12 +91,11 @@ async function getFolderIdByName(accessToken, folderName) {
       );
       
       if (matchingFolder) {
-        console.error(`Found case-insensitive match for "${folderName}" with ID: ${matchingFolder.id}`);
         return matchingFolder.id;
       }
     }
     
-    console.error(`No folder found matching "${folderName}"`);
+    console.warn(`No folder found matching "${folderName}"`);
     return null;
   } catch (error) {
     console.error(`Error finding folder "${folderName}": ${error.message}`);

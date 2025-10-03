@@ -1,7 +1,7 @@
 /**
  * Create rule functionality
  */
-const { callGraphAPI } = require('../utils/graph-api');
+const { callGraphAPI } = require('../src/utils/http-graph-api');
 const { ensureAuthenticated } = require('../auth');
 const { getFolderIdByName } = require('../email/folder-utils');
 const { getInboxRules } = require('./list');
@@ -145,7 +145,7 @@ async function createInboxRule(accessToken, ruleOptions) {
           const highestSequence = Math.max(...existingRules.map(r => r.sequence || 0));
           // Set new rule sequence to be higher
           ruleSequence = Math.max(highestSequence + 1, 100);
-          console.error(`Auto-generated sequence: ${ruleSequence} (based on highest existing: ${highestSequence})`);
+          // Reduced info logging
         }
       } catch (sequenceError) {
         console.error(`Error determining rule sequence: ${sequenceError.message}`);
@@ -154,7 +154,7 @@ async function createInboxRule(accessToken, ruleOptions) {
       }
     }
     
-    console.error(`Using rule sequence: ${ruleSequence}`);
+    // Reduced info logging
     
     // Make sure sequence is a positive integer
     ruleSequence = Math.max(1, Math.floor(ruleSequence));

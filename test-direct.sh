@@ -1,18 +1,40 @@
 #!/bin/bash
-# Test the modular Outlook MCP server directly
+# Manual HTTP testing against local Cloudflare Worker
+set -euo pipefail
 
-# Run the server in a background process
-node /Users/ryaker/Documents/LocalDev/MCP/Projects/OutlookAssistant/modular/index.js > /dev/null 2>&1 &
-SERVER_PID=$!
+PORT=${PORT:-8787}
 
-echo "Started modular Outlook MCP server with PID: $SERVER_PID"
-echo "Using the about tool..."
+echo "Starting local Worker with wrangler on port ${PORT}..."
+(
+  # Start dev server in background
+  npx wrangler dev src/worker.js --port ${PORT} --local > /dev/null 2>&1 &
+  echo $! > .wrangler_dev_pid
+) || { echo "Failed to start wrangler dev"; exit 1; }
 
-# Send a tools/list request to the server
-echo '{"jsonrpc":"2.0","id":"test-1","method":"tools/list"}' | nc localhost 3333
+sleep 2
 
-# Send a tool call request to the server
-echo '{"jsonrpc":"2.0","id":"test-2","method":"tools/call","params":{"name":"about","arguments":{}}}' | nc localhost 3333
+echo "Health:"
+curl -s http://localhost:${PORT}/health | jq .
 
-# Kill the server
-kill $SERVER_PID
+echo "Initialize:"
+curl -s -X POST http://localhost:${PORT}/mcp \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | jq .
+
+echo "Tools list:"
+curl -s -X POST http://localhost:${PORT}/mcp \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' | jq .
+
+echo "Authenticate tool:"
+curl -s -X POST http://localhost:${PORT}/mcp \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"authenticate","arguments":{}}}' | jq .
+
+if [ -f .wrangler_dev_pid ]; then
+  PID=$(cat .wrangler_dev_pid)
+  echo "Stopping wrangler dev (pid $PID)" && kill "$PID" || true
+  rm -f .wrangler_dev_pid
+fi
+
+echo "Done."

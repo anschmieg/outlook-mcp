@@ -6,6 +6,8 @@ const handleCreateRule = require('./create');
 
 // Import getInboxRules for the edit sequence tool
 const { getInboxRules } = require('./list');
+const { ensureAuthenticated } = require('../auth');
+const { callGraphAPI } = require('../src/utils/http-graph-api');
 
 /**
  * Edit rule sequence handler

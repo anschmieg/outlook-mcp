@@ -1,7 +1,7 @@
 /**
  * List rules functionality
  */
-const { callGraphAPI } = require('../utils/graph-api');
+const { callGraphAPI } = require('../src/utils/http-graph-api');
 const { ensureAuthenticated } = require('../auth');
 
 /**

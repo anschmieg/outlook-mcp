@@ -3,9 +3,15 @@
  * Script to create a custom rule for GitHub notifications
  * using direct folder IDs
  */
+// Node-only utility script
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const logger = require('./src/utils/log');
+
+// Configure logger for CLI: default to info unless overridden
+logger.setLevelFromEnv(process.env);
+if (global.__LOG_LEVEL === undefined) logger.setLevel('info');
 
 // Configuration
 const homePath = process.env.HOME || '/Users/ryaker';
@@ -16,16 +22,16 @@ const notificationsFolderId = 'AAMkAGQ0NzYwMTdmLTYzMWUtNDE1ZS04ZDYyLTZjZmQ5YjkyN
 async function createGitHubRule() {
   try {
     // Read the authentication token from file
-    console.log(`Reading token from ${tokenPath}`);
+    logger.info(`Reading token from ${tokenPath}`);
     const tokenData = JSON.parse(fs.readFileSync(tokenPath, 'utf8'));
     const accessToken = tokenData.access_token;
     
     if (!accessToken) {
-      console.error('No access token found in token file!');
+      logger.error('No access token found in token file!');
       process.exit(1);
     }
     
-    console.log('Successfully read access token');
+    logger.info('Successfully read access token');
     
     // Define the rule for GitHub notifications
     const rule = {
@@ -55,14 +61,14 @@ async function createGitHubRule() {
     };
     
     // Create the rule
-    console.log('Creating GitHub notifications rule...');
+    logger.info('Creating GitHub notifications rule...');
     const response = await callGraphAPI('me/mailFolders/inbox/messageRules', 'POST', rule);
     
-    console.log('\nRule created successfully:');
-    console.log(`Name: ${response.displayName}`);
-    console.log(`ID: ${response.id}`);
-    console.log(`Sequence: ${response.sequence}`);
-    console.log(`Enabled: ${response.isEnabled}`);
+    logger.info('\nRule created successfully:');
+    logger.info(`Name: ${response.displayName}`);
+    logger.info(`ID: ${response.id}`);
+    logger.info(`Sequence: ${response.sequence}`);
+    logger.info(`Enabled: ${response.isEnabled}`);
     
     // Create a second rule for repository notifications
     const repoRule = {
@@ -86,18 +92,18 @@ async function createGitHubRule() {
       }
     };
     
-    console.log('\nCreating GitHub repository notifications rule...');
+    logger.info('\nCreating GitHub repository notifications rule...');
     const repoResponse = await callGraphAPI('me/mailFolders/inbox/messageRules', 'POST', repoRule);
     
-    console.log('\nRepository rule created successfully:');
-    console.log(`Name: ${repoResponse.displayName}`);
-    console.log(`ID: ${repoResponse.id}`);
-    console.log(`Sequence: ${repoResponse.sequence}`);
-    console.log(`Enabled: ${repoResponse.isEnabled}`);
+    logger.info('\nRepository rule created successfully:');
+    logger.info(`Name: ${repoResponse.displayName}`);
+    logger.info(`ID: ${repoResponse.id}`);
+    logger.info(`Sequence: ${repoResponse.sequence}`);
+    logger.info(`Enabled: ${repoResponse.isEnabled}`);
     
-    console.log('\nRules created successfully! Your GitHub notifications will now be moved to the Notifications subfolder.');
+    logger.info('\nRules created successfully! Your GitHub notifications will now be moved to the Notifications subfolder.');
   } catch (error) {
-    console.error('Error:', error);
+    logger.error('Error:', error);
   }
 }
 

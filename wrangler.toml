@@ -1,0 +1,24 @@
+name = "outlook-mcp-http"
+main = "src/worker.module.js"
+compatibility_date = "2024-10-01"
+
+# KV namespace for storing OAuth tokens
+[[kv_namespaces]]
+binding = "OUTLOOK_TOKENS"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id"
+
+# Environment variables (set these in Cloudflare dashboard for security)
+# CLIENT_ID = "your-azure-app-client-id"
+# CLIENT_SECRET = "your-azure-app-client-secret"  
+# TENANT_ID = "your-azure-tenant-id-or-common"
+# BASE_URL = "https://outlook-mcp.your-domain.workers.dev"
+
+[build]
+command = "echo 'Build complete'"
+
+[env.development]
+name = "outlook-mcp-http-dev"
+
+[env.production]
+name = "outlook-mcp-http"
